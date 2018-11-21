@@ -178,14 +178,14 @@ def readPDF(pdfFile):
     return textstr
 
 if __name__ == "__main__":
-	crawled = load_pages("crawl_pages")
-	urls = load_urls("urls")
-	word_count = load_word_count("word_count.pkl")
-	vocabulory = load_vocabulory("vocabulory.pkl")
-	# word_count = {}
-	# vocabulory = {}
-	# crawled = {}
-	# urls = ["https://www.cs.uic.edu/"]
+	# crawled = load_pages("crawl_pages")
+	# urls = load_urls("urls")
+	# word_count = load_word_count("word_count.pkl")
+	# vocabulory = load_vocabulory("vocabulory.pkl")
+	word_count = {}
+	vocabulory = {}
+	crawled = {}
+	urls = ["https://www.cs.uic.edu/"]
 	pages = crawl(urls, crawled, word_count, vocabulory)
 	delete_pickle()
 	save_pickle(pages, "crawl_pages")
