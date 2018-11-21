@@ -1,5 +1,6 @@
 import sys
 import pickle
+import nltk
 from nltk.stem import PorterStemmer
 
 def stemmer_porter(arr):  # function to apply stemming on the words
@@ -10,7 +11,7 @@ def stemmer_porter(arr):  # function to apply stemming on the words
 def score(pageranks, query):
 	prob_query = {}
 	ranks = {}
-	query = query.split()
+	query = nltk.word_tokenize(query)
 	query = stemmer_porter(query)
 	for word in query:
 		prob_query[word] = 1/len(query)
