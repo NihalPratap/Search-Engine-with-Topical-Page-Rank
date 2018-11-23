@@ -2,6 +2,12 @@ import sys
 import pickle
 import nltk
 from nltk.stem import PorterStemmer
+from flask import Flask, render_template, redirect, url_for,request, jsonify
+from flask import make_response
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
 
 def stemmer_porter(arr):  # function to apply stemming on the words
     stemmer = PorterStemmer()
@@ -28,11 +34,22 @@ def load_pickle(name):
     with open(name + '.pkl', 'rb') as f:
         return pickle.load(f)
 
+@app.route('/rank', methods=['GET', 'POST'])
+def main():
+	if request.method == 'GET':
+		query = request.args['param']
+		print(query)
+		pageranks = load_pickle("querydependentrank")
+		ranks = score(pageranks, query)
+		results = return_links(ranks)
+		count = 0
+		for i in results:
+			if i[1] == 0:
+				count += 1
+		if count < 10:
+			return jsonify(results)
+		else:
+			return jsonify("No Match")
+
 if __name__ == "__main__":
-	query = sys.argv[1]
-	pageranks = load_pickle("querydependentrank")
-	ranks = score(pageranks, query)
-	results = return_links(ranks)
-	for i in results:
-		print(i)
-		print()
+	app.run(debug=True)

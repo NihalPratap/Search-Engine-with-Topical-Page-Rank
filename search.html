@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Search Engine</title>
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+<!------ Include the above in your HEAD tag ---------->
+<style type="text/css">
+#search {
+    float: right;
+    margin-top: 9px;
+    width: 250px;
+}
+
+.search {
+    padding: 5px 0;
+    width: 230px;
+    height: 30px;
+    position: relative;
+    left: 10px;
+    float: left;
+    line-height: 22px;
+}
+
+    .search input {
+        position: absolute;
+        width: 0px;
+        float: Left;
+        margin-left: 210px;
+        -webkit-transition: all 0.7s ease-in-out;
+        -moz-transition: all 0.7s ease-in-out;
+        -o-transition: all 0.7s ease-in-out;
+        transition: all 0.7s ease-in-out;
+        height: 30px;
+        line-height: 18px;
+        padding: 0 2px 0 2px;
+        border-radius:1px;
+    }
+
+        .search:hover input, .search input:focus {
+            width: 200px;
+            margin-left: 0px;
+        }
+
+.btn {
+    height: 30px;
+    position: absolute;
+    right: 0;
+    top: 5px;
+    border-radius:1px;
+}
+
+</style>
+<script type="text/javascript">
+	function postData() {
+        // location.reload();
+        $.support.cors = true;
+        // jQuery.support.cors = true;
+		var element = document.getElementById("searchform").value;
+    $.ajax({
+        type: "GET",
+        url: "http://127.0.0.1:5000/rank",
+        crossDomain : true,
+        xhrFields: {
+    withCredentials: false
+  },
+        data: { param: element },
+        success: callbackFunc
+    });
+}
+$("#searchform").keyup(function(event) {
+    if (event.keyCode === 13) {
+        console.log("clicked");
+        $("#button").click();
+    }
+});
+
+function callbackFunc(response) {
+    // do something with the response
+    document.getElementById('res').innerHTML = '';
+    console.log("printing result")
+    console.log(response);
+    if(response == "No Match"){
+        $('#res').append('<div>' + response +'</div><br>');
+    }
+    else{
+    for(var i=0; i < response.length; i++){
+        $('#res').append(i+1 +'  <a href="' + response[i][0] + '">' + response[i][0] + '</a><br>');
+}
+}
+}
+
+</script>
+<body>
+<div class="container">
+	<div class="row">
+		<h2>Search Form</h2>
+        <div class="search">
+			<input type="text" id="searchform" class="form-control input-sm" maxlength="64" placeholder="Search" />
+ 			<button type="submit" class="btn btn-primary btn-sm" id="button" onclick="postData()">Search</button>
+		</div>
+	</div>
+    <div class="row">
+        <h2>Results</h2>
+        <div id="res"></div>
+</div>
+</body>
+</html>
