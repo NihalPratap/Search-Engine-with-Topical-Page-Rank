@@ -5,6 +5,8 @@ from nltk.stem import PorterStemmer
 from flask import Flask, render_template, redirect, url_for,request, jsonify
 from flask import make_response
 from flask_cors import CORS
+import os
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -34,12 +36,26 @@ def load_pickle(name):
     with open(name + '.pkl', 'rb') as f:
         return pickle.load(f)
 
+def load(name):
+	if os.path.getsize(name+".pkl") > 0:      
+	    with open(name+".pkl", "rb") as f:
+	        unpickler = pickle.Unpickler(f)
+	        # if file is not empty scores will be equal
+	        # to the value unpickled
+	        return unpickler.load()
+
+def load_json(name):
+	with open(name+'.json') as json_data:
+		return json.load(json_data)
+
 @app.route('/rank', methods=['GET', 'POST'])
 def main():
 	if request.method == 'GET':
 		query = request.args['param']
 		print(query)
-		pageranks = load_pickle("querydependentrank")
+		# pageranks = load_pickle("querydependentrank")
+		pageranks = load_json("querydependentrank")
+		print(len(pageranks))
 		ranks = score(pageranks, query)
 		results = return_links(ranks)
 		count = 0

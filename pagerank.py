@@ -1,6 +1,7 @@
 import numpy as np
 import pickle
-
+import os
+import json
 ### Standard PageRank
 
 # def create_transition_matrix(data):
@@ -34,24 +35,37 @@ import pickle
 
 ### Topical PageRank
 
-def QueryDependentPageRank(tfidf, crawled_pages, beta=0.85):
+def QueryDependentPageRank(tfidf, crawled_pages, inlink, beta=0.85):
 	querydependentrank = {}
 	for doc in tfidf:
 		querydependentrank[doc] = {}
 		for term in tfidf[doc]:
 			querydependentrank[doc][term] = 1/len(tfidf[doc])
 	for iters in range(50):
+		co = 0
 		for doc in tfidf:
-			querydependentrank[doc] = {}
+			co += 1
+			# querydependentrank[doc] = {}
 			for term in tfidf[doc]:
 				s = 0
-				print(term)
-				for i in crawled_pages:
-					if doc in crawled_pages[i][2]:
-						s += (querydependentrank[i][term] if term in querydependentrank[i] else 0) * pi2j_query(term, i, doc, tfidf)
+				# print(term)
+				for i in inlink[doc]:
+					# if doc in crawled_pages[i][2]:
+					s += (querydependentrank[i][term] if term in querydependentrank[i] else 0) * pi2j_query(term, i, doc, tfidf)
 				pdash_query = tfidf[doc][term]/sum(tfidf[i][term] if term in tfidf[i] else 0 for i in tfidf)
 				querydependentrank[doc][term] = (1 - beta) * pdash_query + (beta * s)
-	save_pickle(querydependentrank,"querydependentrank")
+			print(co, iters)
+		# delete_json("querydependentrank")
+			save_json(querydependentrank, "querydependentrank")
+		# delete_pickle("querydependentrank")
+			save_pickle(querydependentrank,"querydependentrank")
+	# save_pickle(querydependentrank,"querydependentrank")
+
+def delete_pickle(name):
+	os.remove(name + ".pkl")
+
+def delete_json(name):
+	os.remove(name + ".json")
 
 def pi2j_query(term, i, j, tfidf):
 	s = 0
@@ -63,17 +77,41 @@ def pi2j_query(term, i, j, tfidf):
 	# sum(tfidf[doc][term] if term in tfidf[doc] else 0 for doc in crawled_pages[i][2])
 
 def save_pickle(obj, name):
-    with open(name + '.pkl', 'wb') as f:
-        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+	with open(name + '.pkl', 'wb') as f:
+		pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
 def load_pickle(name):
-    with open(name + '.pkl', 'rb') as f:
-        return pickle.load(f)
+	with open(name + '.pkl', 'rb') as f:
+		return pickle.load(f)
+
+def save_json(obj, name):
+	j = json.dumps(obj)
+	f = open(name+".json", "w")
+	f.write(j)
+	f.close()
+
+def load(name):
+	if os.path.getsize("inlink.pkl") > 0:      
+	    with open("inlink.pkl", "rb") as f:
+	        unpickler = pickle.Unpickler(f)
+	        # if file is not empty scores will be equal
+	        # to the value unpickled
+	        return unpickler.load()
 
 if __name__ == "__main__":
 	crawled_pages = load_pickle("crawl_pages")
 	tfidf = load_pickle("tfidf")
+	inlink = load("inlink")
 	print(len(crawled_pages))
 	print(len(tfidf))
-	# print(crawled_pages['https://www.cs.uic.edu/<br /> <b>Notice</b>:  Undefined variable: cat_link in <b>/var/www/cs1.engr-dev.uic.edu/wp-content/themes/lincoln/content-single.php</b> on line <b>47</b><br /> '])
-	QueryDependentPageRank(tfidf, crawled_pages, 0.85)
+	QueryDependentPageRank(tfidf, crawled_pages, inlink, 0.85)
+	# inlink = {}
+	# c = 0
+	# for doc in tfidf:
+	# 	c+=1
+	# 	inlink[doc] = []
+	# 	for i in crawled_pages:
+	# 		if doc in crawled_pages[i][2]:
+	# 			inlink[doc].append(crawled_pages[i][0])
+	# 	print(c)
+	# save_pickle(inlink, "inlink")

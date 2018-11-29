@@ -45,7 +45,6 @@ def crawl(urls, crawled, word_count, vocabulory, base=None):
 		if "http://www.cs.uic.edu/bin/view/CHE" in url:
 			continue
 		if url in crawled or url.rstrip("/") in crawled:
-			print("yes")
 			continue
 		print("crawling ", url)
 		try:
@@ -53,23 +52,25 @@ def crawl(urls, crawled, word_count, vocabulory, base=None):
 		except Exception as e:
 			print(e, url)
 			continue
-		crawled[url] = parse(url, response, base, word_count, vocabulory)
-		a = [i for i in crawled[url][2] if (i not in crawled and i.rstrip("/") not in crawled and i not in urls and not any([i.endswith(format) for format in not_allowed]))]
-		urls += a # [url for url in crawled[url][2] if url not in crawled]
-		print("Crawled %s with %d links but unvisited are %d"%(url, len(crawled[url][2]), len(a)))
+		data = parse(url, response, base, word_count, vocabulory)
+		if data is not -1:
+			crawled[url] = data
+			a = [i for i in crawled[url][2] if (i not in crawled and i.rstrip("/") not in crawled and i not in urls and not any([i.endswith(format) for format in not_allowed]))]
+			urls += a
+			print("Crawled %s with %d links but unvisited are %d"%(url, len(crawled[url][2]), len(a)))
 	return crawled
 
 def parse(url, response, base, word_count, vocabulory):
 	soup = BeautifulSoup(response, 'lxml')
 	content = None
 	if url.endswith('.pdf'):
-		# print(url)
 		scrape = urlopen(url)
 		try:
 			content = readPDF(BytesIO(scrape.read()))
 			content = tokenize_text(content, word_count, vocabulory, url)
 		except Exception as e:
 			print(e, url)
+			return -1
 	else:
 		if soup.body:
 			content = cleanMe(soup, response)
@@ -178,14 +179,14 @@ def readPDF(pdfFile):
     return textstr
 
 if __name__ == "__main__":
-	# crawled = load_pages("crawl_pages")
-	# urls = load_urls("urls")
-	# word_count = load_word_count("word_count.pkl")
-	# vocabulory = load_vocabulory("vocabulory.pkl")
-	word_count = {}
-	vocabulory = {}
-	crawled = {}
-	urls = ["https://www.cs.uic.edu/"]
+	crawled = load_pages("crawl_pages")
+	urls = load_urls("urls")
+	word_count = load_word_count("word_count.pkl")
+	vocabulory = load_vocabulory("vocabulory.pkl")
+	# word_count = {}
+	# vocabulory = {}
+	# crawled = {}
+	# urls = ["https://www.cs.uic.edu/"]
 	pages = crawl(urls, crawled, word_count, vocabulory)
 	delete_pickle()
 	save_pickle(pages, "crawl_pages")
